@@ -1,0 +1,16 @@
+.idea/
+.plastic/
+.vscode/
+Assembly-CSharp.csproj
+
+Library/
+Logs/
+The-floor-is-lava-2d.sln
+mono_crash.mem.162.1.blob
+
+
+Temp/
+
+UserSettings/
+ignore.conf
+
