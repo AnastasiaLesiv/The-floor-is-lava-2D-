@@ -1,18 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
+using DefaultNamespace;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(TouchingDirection))]
+[RequireComponent(typeof(Rigidbody2D), typeof(TouchingDirection), typeof(Damageable))]
 public class PlayerController : MonoBehaviour
 {
-    public float runSpeed = 5f;
+    public float runSpeed    = 5f;
     public float jumpImpulse = 10f;
     private Vector2 moveInput;
     private Rigidbody2D rb;
     private Animator animator;
     private TouchingDirection touchingDirection;
+    private Damageable damageable;
     private bool isMoving = false;
     private bool isFacingRight = true;
     
@@ -24,7 +26,7 @@ public class PlayerController : MonoBehaviour
         private set
         {
             isMoving = value;
-            animator.SetBool("isMoving", value);
+            animator.SetBool(AnimationStrings.isMoving, value);
         }
     }
     public bool IsFacingRight
@@ -47,43 +49,93 @@ public class PlayerController : MonoBehaviour
     {
         get
         {
-            if (IsMoving && !touchingDirection.IsOnWall)
+            if (CanMove)
             {
-                if (touchingDirection.IsGrounded)
-                    return runSpeed;
+                if (IsMoving)
+                {
+                    if (touchingDirection.IsGrounded)
+                        return runSpeed;
+                    else
+                        return jumpImpulse;
+                }
                 else
-                    return jumpImpulse;
+                    return 0;
             }
             else
+            {
                 return 0;
+            }
+            
         }
     }
+    public bool CanMove
+    {
+        get => animator.GetBool(AnimationStrings.canMove);
+    }
+    public bool IsAlive
+    {
+        get => animator.GetBool(AnimationStrings.isAlive);
+    }
+
+    
    
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         touchingDirection = GetComponent<TouchingDirection>();
+        damageable = GetComponent<Damageable>();
     } 
     void FixedUpdate()
     {
-        rb.velocity = new Vector2(moveInput.x * CurrentSpeed * 0.5f, rb.velocity.y);
-        animator.SetFloat("yVelocity", rb.velocity.y);
+        if (!damageable.LockVelocity)
+        {
+            rb.velocity = new Vector2(moveInput.x * CurrentSpeed * 0.5f, rb.velocity.y);
+            animator.SetFloat(AnimationStrings.yVelocity, rb.velocity.y);
+        }
+        
     }
     public void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
+        if (IsAlive)
+        {
+            IsMoving = moveInput != Vector2.zero;
+            SetFacingDirection(moveInput);
+        }
+        else
+        {
+            IsMoving = false;
+        }
         IsMoving = moveInput != Vector2.zero;
         SetFacingDirection(moveInput);
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (context.started && touchingDirection.IsGrounded)
+        if (context.started && touchingDirection.IsGrounded && CanMove)
         {
-            animator.SetTrigger("jump");
+            animator.SetTrigger(AnimationStrings.jumpTrigger);
             rb.velocity = new Vector2(rb.velocity.x, CurrentSpeed);
         }
+    }
+    public void OnAttack(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            animator.SetTrigger(AnimationStrings.attackTrigger);
+        }
+    }
+
+    public void OnHit(int damage, Vector2 knockback)
+    {
+        rb.velocity = new Vector2(knockback.x, rb.velocity.y + knockback.y);
+    }
+
+    public void OnRangedAttack(InputAction.CallbackContext context)
+    {
+        if(context.started)
+            animator.SetTrigger(AnimationStrings.rangedAttackTrigger);
     }
     void SetFacingDirection(Vector2 moveInput)
     {
@@ -101,11 +153,12 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Dress")
         {
-            animator.SetBool("isFinish", true);
+            animator.SetBool(AnimationStrings.isFinish, true);
             RestartGameWithDelay(2);
         }
         if (collision.gameObject.tag == "Lava")
         {
+            Debug.Log("Restart");
             RestartGame();
         }
     }
@@ -118,9 +171,11 @@ public class PlayerController : MonoBehaviour
 
     private void RestartGame()
     {
+        
         // Отримуємо індекс поточної сцени
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
 
+        Debug.Log("Reload scene: " + currentSceneIndex);
         // Завантажуємо поточну сцену знову, щоб перезапустити гру
         SceneManager.LoadScene(currentSceneIndex);
     }

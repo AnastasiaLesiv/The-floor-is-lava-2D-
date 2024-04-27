@@ -12,7 +12,8 @@ public class ToggleController : MonoBehaviour
    
     private void OnDisable()
     {
-        PlayerPrefs.SetInt(toggleKey, toggle.isOn ? 1 : 0); // Збереження стану toggle в PlayerPrefs.
+        PlayerPrefs.SetInt(toggleKey, toggle.isOn ? 1 : 0); 
+        // Збереження стану toggle в PlayerPrefs.
     }
 
    private void Awake()
