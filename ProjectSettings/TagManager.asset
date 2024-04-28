@@ -8,6 +8,7 @@ TagManager:
   - Lava
   - Music
   - Toggle_IsSoundOn
+  - Coin
   layers:
   - Default
   - TransparentFX

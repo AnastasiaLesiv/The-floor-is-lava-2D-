@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private bool isMoving = false;
     private bool isFacingRight = true;
     
+    
     public bool IsMoving {
         get
         {
@@ -159,7 +160,7 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.tag == "Lava")
         {
             Debug.Log("Restart");
-            RestartGame();
+            RestartScene();
         }
     }
     
@@ -169,7 +170,7 @@ public class PlayerController : MonoBehaviour
         Invoke("RestartGame", delay);
     }
 
-    private void RestartGame()
+    private void RestartScene()
     {
         
         // Отримуємо індекс поточної сцени
@@ -178,6 +179,11 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Reload scene: " + currentSceneIndex);
         // Завантажуємо поточну сцену знову, щоб перезапустити гру
         SceneManager.LoadScene(currentSceneIndex);
+    }
+
+    private void RestartGame()
+    {
+        SceneManager.LoadScene(0);
     }
 }
 

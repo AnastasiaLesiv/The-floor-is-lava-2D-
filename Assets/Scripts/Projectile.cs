@@ -27,9 +27,11 @@ public class Projectile : MonoBehaviour
             Vector2 deliveredKnockback =
                 transform.localScale.x > 0 ? knockback : new Vector2(knockback.x, knockback.y);
             bool gotHit = damageable.Hit(damage, deliveredKnockback);
-            if(gotHit)
+            if (gotHit)
+            {
                 Debug.Log(collision.name + " hit for " + damage);
-            Destroy(gameObject);
+                Destroy(gameObject);
+            }
         }
     }
 }

@@ -77,7 +77,7 @@ public class Mushroom : MonoBehaviour
        
         if (!damageable.LockVelocity)
         {
-            if (CanMove)
+            if (CanMove && touchingDirection.IsGrounded)
             {
                 rb.velocity = new Vector2(speed * walkDirectionVector.x, rb.velocity.y);
             }
